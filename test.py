@@ -17,7 +17,12 @@ class ComparisonError(ValueError):
 
 def get_num_corrrect(a, b):
     if len(a) != len(b):
-        raise ComparisonError("strings to compare must have the same length")
+        logging.error("Comparison Error: Strings must have the same length")
+        logging.error("First string:")
+        logging.error(f"\"{a}\"")
+        logging.error("Second string:")
+        logging.error(f"\"{b}\"")
+        raise ComparisonError()
     # Return the number of locations where the two strings are equal
     return sum(int(i == j) for i, j in zip(a, b))
 
@@ -74,10 +79,10 @@ def main():
     logging.basicConfig(format="%(levelname)s - %(message)s")
 
     executable = "./decode-cli"
-    plaintext = first_line("data/test/plaintext.txt")
-    ciphertext = first_line("data/test/ciphertext.txt")
+    plaintext = first_line("data/test/short_plaintext.txt")
+    ciphertext = first_line("data/test/short_ciphertext.txt")
     ciphertext_with_breakpoint = first_line(
-        "data/test/ciphertext_breakpoint.txt")
+        "data/test/short_ciphertext_breakpoint.txt")
     dummy_text = "the quick brown fox jumped over the lazy dog."
 
     try:
@@ -101,6 +106,7 @@ def main():
         print("Plaintext output is not the same length as the ciphertext.")
         exit(-1)
     except:
+        print(traceback.format_exc())
         print("!!! ERROR !!!")
         print("Your code seems to have errors.",
               "Please fix them and then rerun this test.")

@@ -207,9 +207,9 @@ def decode_1_smartest(ciphertext, datasets):
     elif len(ciphertext) <= 750:
         it = 15000
     elif len(ciphertext) <= 1400:
-        it = 10000
+        it = 9000
     else:
-        it = 8000
+        it = 6000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -250,9 +250,9 @@ def decode_1_smarter(ciphertext, datasets):
     elif len(ciphertext) <= 750:
         it = 15000
     elif len(ciphertext) <= 1400:
-        it = 10000
+        it = 9000
     else:
-        it = 8000
+        it = 6000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -293,9 +293,9 @@ def decode_1_dumbest(ciphertext, datasets):
     elif len(ciphertext) <= 750:
         it = 15000
     elif len(ciphertext) <= 1400:
-        it = 10000
+        it = 9000
     else:
-        it = 8000
+        it = 6000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -336,7 +336,7 @@ def decode_part_1(ciphertext, datasets):
 
 '''part_1 decryption used in part 2'''
 def decode_part_2_rough(ciphertext, datasets):
-    it = min(2000000//len(ciphertext),10000)
+    it = min(1500000//len(ciphertext),9000)
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
 
@@ -424,15 +424,15 @@ def decode_part_2(ciphertext, datasets):
         if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
             likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
         likelihoods[index_list[i]] = likelihood
-        print("bp is " + str(index_list[i]))
-        print("accuracy for trial "  + str(i+1) + " is " + str(accuracy(post_decoded_tog)))
+        # print("bp is " + str(index_list[i]))
+        # print("accuracy for trial "  + str(i+1) + " is " + str(accuracy(post_decoded_tog)))
 
     # consider edge case where breakpoint is on very edge so there is no breakpoint
     edge_case = decode_part_2_rough(ciphertext, datasets)
     likelihoods[0] = edge_case["loglikelihood"]
 
     bp_2 = max(likelihoods.keys(), key = lambda x: likelihoods[x])
-    print("best bp are " + str(bp_1) + " and " + str(bp_2))
+    # print("best bp are " + str(bp_1) + " and " + str(bp_2))
 
     plaintext_dict = {}
 
@@ -445,7 +445,7 @@ def decode_part_2(ciphertext, datasets):
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    print("zeroeth likelihood is " + str(likelihood))
+    # print("zeroeth likelihood is " + str(likelihood))
 
     pre_bp = ciphertext[:bp_1]
     post_bp = ciphertext[bp_1:]
@@ -456,7 +456,7 @@ def decode_part_2(ciphertext, datasets):
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    print("third likelihood is " + str(likelihood))
+    # print("third likelihood is " + str(likelihood))
 
     pre_bp = ciphertext[:bp_2]
     post_bp = ciphertext[bp_2:]
@@ -467,10 +467,10 @@ def decode_part_2(ciphertext, datasets):
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    print("fourth likelihood is " + str(likelihood))
+    # print("fourth likelihood is " + str(likelihood))
 
     plaintext = max(plaintext_dict.keys(), key = lambda x: plaintext_dict[x])
-    print("accuracy after taking best is " + str(accuracy(plaintext)))
+    # print("accuracy after taking best is " + str(accuracy(plaintext)))
     return plaintext
 
 '''Cleans up final result using a spellchecker'''
@@ -507,23 +507,23 @@ def decode(ciphertext, has_breakpoint):
     plaintext = ""
     if (has_breakpoint):
         plaintext = decode_part_2(ciphertext, datasets)
-        print("accuracy is: " + str(accuracy(plaintext)))
+        # print("accuracy is: " + str(accuracy(plaintext)))
         plaintext = cleanup(plaintext, datasets)
     else:
         plaintext = decode_part_1(ciphertext, datasets)["plaintext"]
-    print("final accuracy is: " + str(accuracy(plaintext)))
+    # print("final accuracy is: " + str(accuracy(plaintext)))
     return plaintext
 
-''' main function of module '''
-def main():
-    random.seed(163)
-    fin = open("ciphertext.txt", "r")
-    ciphertext = fin.read()
-    fin.close()
-    plaintext = decode(ciphertext, True)
-    fout = open("decoded_text.txt", "w")
-    fout.write(plaintext)
-    fout.close()
+# ''' main function of module '''
+# def main():
+#     random.seed(163)
+#     fin = open("ciphertext.txt", "r")
+#     ciphertext = fin.read()
+#     fin.close()
+#     plaintext = decode(ciphertext, True)
+#     fout = open("decoded_text.txt", "w")
+#     fout.write(plaintext)
+#     fout.close()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

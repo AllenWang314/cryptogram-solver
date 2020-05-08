@@ -201,15 +201,15 @@ def score(plaintext, datasets):
 '''Outputs MAP of ciphertext via MCMC with no breakpoints'''
 def decode_1_smartest(ciphertext, datasets):
     random.seed(314)
-    it = 30000
+    it = 20000
     if len(ciphertext) <= 350:
-        it = 40000
+        it = 22000
     elif len(ciphertext) <= 750:
-        it = 20000
-    elif len(ciphertext) <= 1400:
         it = 15000
+    elif len(ciphertext) <= 1400:
+        it = 10000
     else:
-        it = 9000
+        it = 8000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -244,15 +244,15 @@ def decode_1_smartest(ciphertext, datasets):
 '''Outputs MAP of ciphertext via MCMC with no breakpoints'''
 def decode_1_smarter(ciphertext, datasets):
     random.seed(271)
-    it = 30000
+    it = 20000
     if len(ciphertext) <= 350:
-        it = 40000
+        it = 22000
     elif len(ciphertext) <= 750:
-        it = 20000
-    elif len(ciphertext) <= 1400:
         it = 15000
+    elif len(ciphertext) <= 1400:
+        it = 10000
     else:
-        it = 9000
+        it = 8000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -287,15 +287,15 @@ def decode_1_smarter(ciphertext, datasets):
 '''Outputs MAP of ciphertext via MCMC with no breakpoints'''
 def decode_1_dumbest(ciphertext, datasets):
     random.seed(577)
-    it = 30000
+    it = 20000
     if len(ciphertext) <= 350:
-        it = 30000
+        it = 22000
     elif len(ciphertext) <= 750:
-        it = 20000
-    elif len(ciphertext) <= 1400:
         it = 15000
-    else:
+    elif len(ciphertext) <= 1400:
         it = 10000
+    else:
+        it = 8000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -332,66 +332,50 @@ def decode_part_1(ciphertext, datasets):
     smartest = decode_1_smartest(ciphertext, datasets)
     smarter = decode_1_smarter(ciphertext, datasets)
     dumbest = decode_1_dumbest(ciphertext, datasets)
-    #print("accuracy for smartest is " + str(accuracy(smartest["plaintext"])) + ", score is " + str(smartest["loglikelihood"]))
-    #print("accuracy for smarter is " + str(accuracy(smarter["plaintext"])) + ", score is " + str(smarter["loglikelihood"]))
-    #print("accuracy for dumbest is " + str(accuracy(dumbest["plaintext"])) + ", score is " + str(dumbest["loglikelihood"]))
     return max([smartest,smarter,dumbest], key = lambda x: x["loglikelihood"])
 
 '''part_1 decryption used in part 2'''
-def decode_part_2_helper(ciphertext, datasets):
-    it = 1000000
+def decode_part_2_rough(ciphertext, datasets):
+    it = min(2000000//len(ciphertext),10000)
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
 
     # initialize string    
-    curr_str = initial_str(ciphertext, datasets)
+    curr_str = random_str(datasets)
 
     # statistics to keep track of
-    unique_keys = set([curr_str])
-    curr_likelihood = likelihood(ciphertext, curr_str, datasets) # likelihood of the current key
-    log_likelihood_dict = {curr_str: curr_likelihood} # dict of curr likelihoods
+    curr_likelihood, _ = likelihood(ciphertext, curr_str, datasets) # likelihood of the current key
+    best_likelihood = curr_likelihood
+    best_key = curr_str
 
     # iterate through MCMC
     for i in range(it):
-
-        if (i % 1000 == 0):
-            print("on interation " + str(i) + ", some stats:")
-            print("key is: " + curr_str)
-            print("log likelihood is: " + str(likelihood(ciphertext, curr_str, datasets)))
-            print("accuracy is: " + str(accuracy(decipher(ciphertext, curr_str, datasets))))
-            print("-------------------------------------------")
         # generate next key and compute likelihood
         next_str = transition(ciphertext, curr_str)
-        next_likelihood = likelihood(ciphertext, next_str, datasets)
+        next_likelihood, _ = likelihood(ciphertext, next_str, datasets)
 
         # check if proposal passes
-        if (accept(ciphertext, curr_likelihood, next_likelihood)):
+        if (accept(curr_likelihood, next_likelihood)):
             curr_str = next_str
             curr_likelihood = next_likelihood
-            unique_keys.add(curr_str)
-            log_likelihood_dict[curr_str] = curr_likelihood
+            if (curr_likelihood > best_likelihood):
+                best_likelihood = curr_likelihood
+                best_key = curr_str
 
-    # sort and find MAP
-    key_list = list(unique_keys)
-    key_list.sort(key = lambda x: log_likelihood_dict[x], reverse = True)
-    print("accuracy is " + str(accuracy(decipher(ciphertext, key_list[0], datasets))))
-
-    return {"plaintext": decipher(ciphertext, key_list[0], datasets), "loglikelihood": log_likelihood_dict[key_list[0]]}
+    return {"plaintext": decipher(ciphertext, best_key, datasets), "loglikelihood": best_likelihood}
 
 '''Outputs modified notion of divergence based on KL divergence
     we use the sum of two KL divergences to force the notion of symmetry
     and we form d1_adj and d2_adj to avoid div by 0 and as some sort of prior'''
 def divergence(index, ciphertext_len, frequencies_forward, frequencies_backward, alphabet):
-    freq_1 = frequencies_forward[index] # first index + 1 letters
-    freq_2 = frequencies_backward[ciphertext_len - index - 2] # last ciphertext_len - index - 1 letters
+    freq_1 = frequencies_forward[index - 1] # first index letters
+    freq_2 = frequencies_backward[ciphertext_len - index - 1] # last ciphertext_len - index letters
     total = 0
     alpha = 1/2
 
     for letter in alphabet:
-        d1 = freq_1[letter]/(index + 1)
-        d2 = freq_2[letter]/(ciphertext_len - index - 1)
-        d1_adj = (freq_1[letter] + alpha)/(index + 1 + 28 * alpha)
-        d2_adj = (freq_2[letter] + alpha)/(ciphertext_len - index - 1 + 28*alpha)
+        d1_adj = (freq_1[letter] + alpha)/(index + 28 * alpha)
+        d2_adj = (freq_2[letter] + alpha)/(ciphertext_len - index + 28*alpha)
         total += d1_adj * np.log(d1_adj/d2_adj) + d2_adj * np.log(d2_adj/d1_adj)
 
     return(total)
@@ -402,45 +386,92 @@ def find_bp(ciphertext, alphabet):
     frequencies_backward = []
     divergences = {}
 
-    # compute char_freq moving forwards
+    # compute char_freq moving forwards: index i has the first i+1 letters
     char_freq = dict((char,0) for char in alphabet)
     for char in ciphertext:
         char_freq[char] += 1
         frequencies_forward.append(char_freq.copy())
     
-    # compute char_freq moving backwards
+    # compute char_freq moving backwards index i has the last i+1 letters
     char_freq = dict((char,0) for char in alphabet)
     for i in range(len(ciphertext)-1,-1,-1):
         char_freq[ciphertext[i]] += 1
         frequencies_backward.append(char_freq.copy())
 
-    for j in range(0,len(ciphertext)-1):
+    # here j is the number of letters in the first part
+    for j in range(1,len(ciphertext)):
         divergences[j] = divergence(j, len(ciphertext), frequencies_forward, frequencies_backward, alphabet)    
     
     index_list = list(divergences.keys())
     index_list.sort(key = lambda x: divergences[x], reverse = True) 
+    print(index_list[:20])
     return index_list
 
 '''Outputs MAP estimate when there is a breakpoint'''
 def decode_part_2(ciphertext, datasets):
     index_list = find_bp(ciphertext, datasets["alphabet"])
     likelihoods = {}
+    bp_1 = index_list[0]
 
-    for i in range(25):
-        pre_bp = ciphertext[:index_list[i]+1]
-        post_bp = ciphertext[index_list[i]+1:]
-        pre_bp_decoded = decode_part_2_helper(pre_bp, datasets)
-        post_bp_decoded = decode_part_2_helper(post_bp, datasets)
+    # the first index in find_bp automatically qualifies
+    for i in range(1,15):
+        pre_bp = ciphertext[:index_list[i]]
+        post_bp = ciphertext[index_list[i]:]
+        pre_bp_decoded = decode_part_2_rough(pre_bp, datasets)
+        post_bp_decoded = decode_part_2_rough(post_bp, datasets)
         post_decoded_tog = pre_bp_decoded["plaintext"] + post_bp_decoded["plaintext"]
-        likelihood = pre_bp_decoded["likelihood"] + post_bp_decoded["likelihood"]
+        likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
         if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
-            likelihood += datasets["letter_trans"][post_bp_decoded["plaintext"][0]][pre_bp_decoded["plaintext"][-1]]
-        likelihoods[post_decoded_tog] = likelihood
-        # print("accuracy for trial "  + str(i+1) + " is " + str(accuracy(post_decode)))
+            likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
+        likelihoods[index_list[i]] = likelihood
+        print("bp is " + str(index_list[i]))
+        print("accuracy for trial "  + str(i+1) + " is " + str(accuracy(post_decoded_tog)))
 
-    ans = max(likelihoods.keys(), key = lambda x: likelihoods[x])
-    # print("accuracy is " + str(accuracy(ans)))
-    return ans
+    # consider edge case where breakpoint is on very edge so there is no breakpoint
+    edge_case = decode_part_2_rough(ciphertext, datasets)
+    likelihoods[0] = edge_case["loglikelihood"]
+
+    bp_2 = max(likelihoods.keys(), key = lambda x: likelihoods[x])
+    print("best bp are " + str(bp_1) + " and " + str(bp_2))
+
+    plaintext_dict = {}
+
+    pre_bp = ciphertext[:bp_1]
+    post_bp = ciphertext[bp_1:]
+    pre_bp_decoded = decode_1_smartest(pre_bp, datasets)
+    post_bp_decoded = decode_1_smartest(post_bp, datasets)
+    post_decoded_tog = pre_bp_decoded["plaintext"] + post_bp_decoded["plaintext"]
+    likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
+    if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
+        likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
+    plaintext_dict[post_decoded_tog] = likelihood
+    print("zeroeth likelihood is " + str(likelihood))
+
+    pre_bp = ciphertext[:bp_1]
+    post_bp = ciphertext[bp_1:]
+    pre_bp_decoded = decode_1_dumbest(pre_bp, datasets)
+    post_bp_decoded = decode_1_dumbest(post_bp, datasets)
+    post_decoded_tog = pre_bp_decoded["plaintext"] + post_bp_decoded["plaintext"]
+    likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
+    if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
+        likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
+    plaintext_dict[post_decoded_tog] = likelihood
+    print("third likelihood is " + str(likelihood))
+
+    pre_bp = ciphertext[:bp_2]
+    post_bp = ciphertext[bp_2:]
+    pre_bp_decoded = decode_1_dumbest(pre_bp, datasets)
+    post_bp_decoded = decode_1_dumbest(post_bp, datasets)
+    post_decoded_tog = pre_bp_decoded["plaintext"] + post_bp_decoded["plaintext"]
+    likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
+    if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
+        likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
+    plaintext_dict[post_decoded_tog] = likelihood
+    print("fourth likelihood is " + str(likelihood))
+
+    plaintext = max(plaintext_dict.keys(), key = lambda x: plaintext_dict[x])
+    print("accuracy after taking best is " + str(accuracy(plaintext)))
+    return plaintext
 
 '''Cleans up final result using a spellchecker'''
 def cleanup(plaintext, datasets):
@@ -485,7 +516,7 @@ def decode(ciphertext, has_breakpoint):
 
 ''' main function of module '''
 def main():
-    random.seed(162)
+    random.seed(163)
     fin = open("ciphertext.txt", "r")
     ciphertext = fin.read()
     fin.close()

@@ -205,11 +205,11 @@ def decode_1_smartest(ciphertext, datasets):
     if len(ciphertext) <= 350:
         it = 22000
     elif len(ciphertext) <= 750:
-        it = 15000
+        it = 10000
     elif len(ciphertext) <= 1400:
         it = 9000
     else:
-        it = 6000
+        it = 7000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -220,7 +220,9 @@ def decode_1_smartest(ciphertext, datasets):
     # statistics to keep track of
     curr_likelihood, plaintext = likelihood(ciphertext, curr_str, datasets) # likelihood of the current key
     curr_score = score(plaintext, datasets)
-    log_likelihood_distorted = {curr_str: curr_likelihood + curr_score} # dict of curr likelihoods
+    best_key = curr_str
+    best_likelihood = curr_likelihood + curr_score
+
 
     # iterate through MCMC
     for i in range(it):
@@ -234,12 +236,10 @@ def decode_1_smartest(ciphertext, datasets):
             curr_str = next_str
             curr_likelihood = next_likelihood
             curr_score = next_score
-            log_likelihood_distorted[curr_str] = curr_likelihood + curr_score
-
-    # sort and find MAP
-    key_list = list(log_likelihood_distorted.keys())
-    key_list.sort(key = lambda x: log_likelihood_distorted[x], reverse = True)
-    return {"plaintext": decipher(ciphertext, key_list[0], datasets), "loglikelihood": log_likelihood_distorted[key_list[0]]}
+            if (curr_likelihood + curr_score > best_likelihood):
+                best_key = curr_str
+                best_likelihood = curr_likelihood + curr_score
+    return {"plaintext": decipher(ciphertext, best_key, datasets), "loglikelihood": best_likelihood}
 
 '''Outputs MAP of ciphertext via MCMC with no breakpoints'''
 def decode_1_smarter(ciphertext, datasets):
@@ -250,9 +250,9 @@ def decode_1_smarter(ciphertext, datasets):
     elif len(ciphertext) <= 750:
         it = 15000
     elif len(ciphertext) <= 1400:
-        it = 9000
+        it = 10000
     else:
-        it = 6000
+        it = 7000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -263,7 +263,8 @@ def decode_1_smarter(ciphertext, datasets):
     # statistics to keep track of
     curr_likelihood, plaintext = likelihood(ciphertext, curr_str, datasets) # likelihood of the current key
     curr_score = score(plaintext, datasets)
-    log_likelihood_distorted = {curr_str: curr_likelihood + curr_score} # dict of curr likelihoods
+    best_key = curr_str
+    best_likelihood = curr_likelihood + curr_score
 
     # iterate through MCMC
     for i in range(it):
@@ -277,12 +278,11 @@ def decode_1_smarter(ciphertext, datasets):
             curr_str = next_str
             curr_likelihood = next_likelihood
             curr_score = next_score
-            log_likelihood_distorted[curr_str] = curr_likelihood + curr_score
+            if (curr_likelihood + curr_score > best_likelihood):
+                best_key = curr_str
+                best_likelihood = curr_likelihood + curr_score
 
-    # sort and find MAP
-    key_list = list(log_likelihood_distorted.keys())
-    key_list.sort(key = lambda x: log_likelihood_distorted[x], reverse = True)
-    return {"plaintext": decipher(ciphertext, key_list[0], datasets), "loglikelihood": log_likelihood_distorted[key_list[0]]}
+    return {"plaintext": decipher(ciphertext, best_key, datasets), "loglikelihood": best_likelihood}
 
 '''Outputs MAP of ciphertext via MCMC with no breakpoints'''
 def decode_1_dumbest(ciphertext, datasets):
@@ -293,9 +293,9 @@ def decode_1_dumbest(ciphertext, datasets):
     elif len(ciphertext) <= 750:
         it = 15000
     elif len(ciphertext) <= 1400:
-        it = 9000
+        it = 10000
     else:
-        it = 6000
+        it = 7000
 
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
@@ -306,7 +306,8 @@ def decode_1_dumbest(ciphertext, datasets):
     # statistics to keep track of
     curr_likelihood, plaintext = likelihood(ciphertext, curr_str, datasets) # likelihood of the current key
     curr_score = score(plaintext, datasets)
-    log_likelihood_distorted = {curr_str: curr_likelihood + curr_score} # dict of curr likelihoods
+    best_key = curr_str
+    best_likelihood = curr_likelihood + curr_score
 
     # iterate through MCMC
     for i in range(it):
@@ -320,12 +321,11 @@ def decode_1_dumbest(ciphertext, datasets):
             curr_str = next_str
             curr_likelihood = next_likelihood
             curr_score = next_score
-            log_likelihood_distorted[curr_str] = curr_likelihood + curr_score
+            if (curr_likelihood + curr_score > best_likelihood):
+                best_key = curr_str
+                best_likelihood = curr_likelihood + curr_score
 
-    # sort and find MAP
-    key_list = list(log_likelihood_distorted.keys())
-    key_list.sort(key = lambda x: log_likelihood_distorted[x], reverse = True)
-    return {"plaintext": decipher(ciphertext, key_list[0], datasets), "loglikelihood": log_likelihood_distorted[key_list[0]]}
+    return {"plaintext": decipher(ciphertext, best_key, datasets), "loglikelihood": best_likelihood}
 
 '''Main decode function for part_1, calls decode dumbest, smarter, and smartest'''
 def decode_part_1(ciphertext, datasets):
@@ -336,7 +336,7 @@ def decode_part_1(ciphertext, datasets):
 
 '''part_1 decryption used in part 2'''
 def decode_part_2_rough(ciphertext, datasets):
-    it = min(1500000//len(ciphertext),9000)
+    it = min(1800000//len(ciphertext),9500)
     if len(ciphertext) == 0:
         return {"plaintext" : "", "loglikelihood" : 0}
 
@@ -404,14 +404,15 @@ def find_bp(ciphertext, alphabet):
     
     index_list = list(divergences.keys())
     index_list.sort(key = lambda x: divergences[x], reverse = True) 
-    print(index_list[:20])
     return index_list
 
 '''Outputs MAP estimate when there is a breakpoint'''
 def decode_part_2(ciphertext, datasets):
     index_list = find_bp(ciphertext, datasets["alphabet"])
-    likelihoods = {}
     bp_1 = index_list[0]
+    bp_2 = bp_1
+    best_plaintext = ""
+    best_likelihood = -1e20
 
     # the first index in find_bp automatically qualifies
     for i in range(1,15):
@@ -423,18 +424,19 @@ def decode_part_2(ciphertext, datasets):
         likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
         if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
             likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
-        likelihoods[index_list[i]] = likelihood
-        # print("bp is " + str(index_list[i]))
-        # print("accuracy for trial "  + str(i+1) + " is " + str(accuracy(post_decoded_tog)))
+        if (likelihood > best_likelihood):
+            best_plaintext = post_decoded_tog
+            best_likelihood = likelihood
+            bp_2 = index_list[i]
 
     # consider edge case where breakpoint is on very edge so there is no breakpoint
     edge_case = decode_part_2_rough(ciphertext, datasets)
-    likelihoods[0] = edge_case["loglikelihood"]
-
-    bp_2 = max(likelihoods.keys(), key = lambda x: likelihoods[x])
-    # print("best bp are " + str(bp_1) + " and " + str(bp_2))
-
-    plaintext_dict = {}
+    if (edge_case["loglikelihood"] > best_likelihood):
+        best_plaintext = edge_case["plaintext"]
+        best_likelihood = edge_case["loglikelihood"]
+        bp_2 = 0
+    
+    plaintext_dict = {best_plaintext : best_likelihood + score(best_plaintext, datasets)}
 
     pre_bp = ciphertext[:bp_1]
     post_bp = ciphertext[bp_1:]
@@ -445,7 +447,6 @@ def decode_part_2(ciphertext, datasets):
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    # print("zeroeth likelihood is " + str(likelihood))
 
     pre_bp = ciphertext[:bp_1]
     post_bp = ciphertext[bp_1:]
@@ -456,21 +457,18 @@ def decode_part_2(ciphertext, datasets):
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    # print("third likelihood is " + str(likelihood))
 
     pre_bp = ciphertext[:bp_2]
     post_bp = ciphertext[bp_2:]
-    pre_bp_decoded = decode_1_dumbest(pre_bp, datasets)
-    post_bp_decoded = decode_1_dumbest(post_bp, datasets)
+    pre_bp_decoded = decode_1_smartest(pre_bp, datasets)
+    post_bp_decoded = decode_1_smartest(post_bp, datasets)
     post_decoded_tog = pre_bp_decoded["plaintext"] + post_bp_decoded["plaintext"]
     likelihood = pre_bp_decoded["loglikelihood"] + post_bp_decoded["loglikelihood"]
     if (len(pre_bp_decoded["plaintext"]) * len(post_bp_decoded["plaintext"]) > 0):
         likelihood += datasets["letter_trans"][datasets['alphabet_dict'][post_bp_decoded["plaintext"][0]]][datasets['alphabet_dict'][pre_bp_decoded["plaintext"][-1]]]
     plaintext_dict[post_decoded_tog] = likelihood
-    # print("fourth likelihood is " + str(likelihood))
 
     plaintext = max(plaintext_dict.keys(), key = lambda x: plaintext_dict[x])
-    # print("accuracy after taking best is " + str(accuracy(plaintext)))
     return plaintext
 
 '''Cleans up final result using a spellchecker'''
@@ -507,23 +505,23 @@ def decode(ciphertext, has_breakpoint):
     plaintext = ""
     if (has_breakpoint):
         plaintext = decode_part_2(ciphertext, datasets)
-        # print("accuracy is: " + str(accuracy(plaintext)))
+        # print("accuracy is " + str(accuracy(plaintext)))
         plaintext = cleanup(plaintext, datasets)
     else:
         plaintext = decode_part_1(ciphertext, datasets)["plaintext"]
-    # print("final accuracy is: " + str(accuracy(plaintext)))
+    # print("final accuracy is " + str(accuracy(plaintext)))
     return plaintext
 
-# ''' main function of module '''
-# def main():
-#     random.seed(163)
-#     fin = open("ciphertext.txt", "r")
-#     ciphertext = fin.read()
-#     fin.close()
-#     plaintext = decode(ciphertext, True)
-#     fout = open("decoded_text.txt", "w")
-#     fout.write(plaintext)
-#     fout.close()
+''' main function of module '''
+def main():
+    random.seed(163)
+    fin = open("ciphertext.txt", "r")
+    ciphertext = fin.read()
+    fin.close()
+    plaintext = decode(ciphertext, True)
+    fout = open("decoded_text.txt", "w")
+    fout.write(plaintext)
+    fout.close()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

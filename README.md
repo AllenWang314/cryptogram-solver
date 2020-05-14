@@ -19,4 +19,5 @@ Information about the project, my solution, and my thought process can be found 
 ## Results
 
 - The performance without breakpoints turned out to be in the 90% range
-- The preformance with breakpoints was in the low 80%
+- The preformance with breakpoints was in the low 80% range
+- Project was overall highly enjoyable :)

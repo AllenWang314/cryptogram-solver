@@ -65,6 +65,7 @@ def accept(curr_likelihood, next_likelihood):
 '''Outputs boolean whether or not to accept next_str, the next key, given 
 log of curr_likelihood and next_likelihood'''
 def accept_biased(curr_score, next_score, curr_likelihood, next_likelihood, it):
+    # after sufficiently many iterations, bias transition if score is significantly higher
     if (next_score * 4 + next_likelihood > curr_score * 4 + curr_likelihood  and it > 2000):
         return True
     threshhold = next_likelihood - curr_likelihood
@@ -89,6 +90,7 @@ def decipher(ciphertext, key, datasets):
 def find_possible_periods(ciphertext, space, char_freq):
     possible_periods = set(char_freq.copy())
     possible_periods.remove(ciphertext[0]) # rule: cannot begin with a period
+    # remove all characters that follow a space
     for i in range(len(ciphertext)-1):
         if (ciphertext[i+1] != space and ciphertext[i] in possible_periods):
             possible_periods.remove(ciphertext[i])
@@ -98,7 +100,7 @@ def find_possible_periods(ciphertext, space, char_freq):
 
 '''finds all double letters in ciphertext and orders by frequency'''
 def find_double_letters(ciphertext):
-    # char_freq not used
+    # find all the double letters
     freqs = {}
     for i in range(len(ciphertext)-1):
         if (ciphertext[i] == ciphertext[i+1]):
@@ -106,13 +108,14 @@ def find_double_letters(ciphertext):
                 freqs[ciphertext[i]] = 1
             else:
                 freqs[ciphertext[i]] += 1
+    # order them by frequency
     double_letters = list(freqs.keys())
     double_letters.sort(key = lambda x: freqs[x], reverse = True)
     return double_letters
 
 '''finds all single letter words in ciphertext and orders by frequency'''
 def find_single_letters(ciphertext, space, char_freq):
-    # char_freq not used
+    # char_freq not used (used in earlier version, might be useful)
     freqs = {}
     for i in range(len(ciphertext)-2):
         if (ciphertext[i] == space and ciphertext[i+2] == space):
@@ -414,7 +417,7 @@ def decode_part_2(ciphertext, datasets):
     best_plaintext = ""
     best_likelihood = -1e20
 
-    # the first index in find_bp automatically qualifies
+    # the first index in find_bp automatically qualifies for final comparisons
     for i in range(1,15):
         pre_bp = ciphertext[:index_list[i]]
         post_bp = ciphertext[index_list[i]:]
@@ -473,9 +476,11 @@ def decode_part_2(ciphertext, datasets):
 
 '''Cleans up final result using a spellchecker'''
 def cleanup(plaintext, datasets):
+    # only correct if one letter is off
     spell = SpellChecker(distance = 1)
     words = plaintext.split()
     for i in range(len(words)):
+        # consider casework on periods and guarantee words are same length as before
         if "." not in words[i] and words[i] not in datasets["english_dict"]:
             correction = spell.correction(words[i])
             if (len(correction) == len(words[i])):
@@ -514,7 +519,9 @@ def decode(ciphertext, has_breakpoint):
 
 ''' main function of module '''
 def main():
-    random.seed(163)
+    # when testing with encode.py use ciphertext.txt and plaintext.txt as inputs
+    # decoded text at end written in decoded_text.txt
+    random.seed(162)
     fin = open("ciphertext.txt", "r")
     ciphertext = fin.read()
     fin.close()

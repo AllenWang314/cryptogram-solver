@@ -9,8 +9,8 @@ Information about the project, my solution, and my thought process can be found 
 ## Relevant Files
 
 - `requirements.txt` contains the requirements to be downloaded
-- `decode_part_1.py` contains the main functions used for part I
-- `decode_part_1_better.py` contains improved versions of functions in `decode_part_1.py`
+- `old_code/decode_part_1.py` contains the main functions used for part I
+- `old_code/decode_part_1_better.py` contains improved versions of functions in `decode_part_1.py`
 - `decode.py` contains the final version of the decode function that supports breakpoints
 - `encode.py` is a script that encrypts some message into two files
 - `data` is a folder with some sample texts and useful datasets

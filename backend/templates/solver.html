@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block title %}Assignment{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h1>Cryptogram Solver</h1>
+<div id="info">
+    This is an implementation of a MCMC based decryption algorithm for English aristocrat cryptograms. The project was conducted as part of an MIT class. There were two parts to the project: a part where a breakpoint is allowed and a part where a breakpoint is not allowed (i.e. the key does not change). For this webapp, we only demonstrate the functionality of the latter. On the top, you may wish to encrypt any plaintext into a cipher text using a random key. On the bottom you can enter an already encrypted string to find the plaintext.
+</div>
+
+<div id="encryption-row">
+    <div class="row-item-left">
+        <p>Input Plaintext</p>
+
+        <form action="/encrypt">
+            <textarea name="input_plaintext" rows="5" cols="70%">{{ input_plaintext }}</textarea>
+            <br><br>
+            <button class="ui button">Encrypt Text</button>
+        </form>
+    </div>
+
+    <div class="row-item-right">
+        <p>Generated Ciphertext</p>
+            <textarea name="input_plaintext" rows="5" cols="70%">{{ generated_ciphertext }}</textarea>
+    </div>
+</div>
+
+<img id="loading" src="{{ url_for('static', filename='loading.gif') }}"/>
+
+<div id="decryption-row">
+    <div class="row-item-left">
+        <p>Ciphertext</p>
+
+        <form action="/decrypt">
+            <textarea name="input_ciphertext" rows="5" cols="70%">{{ input_ciphertext }}</textarea>
+            <br><br>
+            <button onclick="triggerLoading();" class="ui button">Decrypt Text</button>
+        </form>
+    </div>
+
+    <div class="row-item-right">
+        <p>Decrypted Plaintext</p>
+            <textarea name="input_plaintext" rows="5" cols="70%">{{ generated_plaintext }}</textarea>
+    </div>
+</div>
+{% endblock %}
+{% block end %}
+<script type="text/javascript">
+    function triggerLoading() {
+        const loadingGif = document.getElementById("loading");
+        loadingGif.style.display = "block";
+    }
+</script>
+{% endblock %}

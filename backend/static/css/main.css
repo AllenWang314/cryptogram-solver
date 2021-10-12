@@ -1,0 +1,116 @@
+@font-face {
+    font-family: Montserrat;
+    src: url(../fonts/Montserrat/Montserrat-Light.ttf);
+}
+
+* {
+    font-family: Montserrat;
+}
+
+body {
+    background-color: #C6EFFF;
+    color: #124253;
+}
+
+#content {
+    width:90%;
+    margin: auto;
+}
+
+.ui .secondary .pointing .menu {
+    padding-left: 5%
+}
+
+.pdfobject-container { 
+    height: 40vw; 
+    border: 1rem solid rgba(0,0,0,.1); 
+}
+
+#footer {
+    position: absolute;
+    padding-top: 1vw;
+    padding-bottom: 2vw;
+    bottom: 0;
+    width: 100%;
+}
+
+#credits {
+    text-align: center;
+}
+
+#encryption-row {
+    display: flex;
+    flex-direction: horizontal;
+    padding-top: 2.5%;
+    padding-bottom: 2.5%;
+}
+
+#decryption-row {
+    display: flex;
+    flex-direction: horizontal;
+    padding-top: 2.5%;
+    padding-bottom: 2.5%;
+}
+
+.row-item-left {
+    margin-right: 5%;
+    width: 100%;
+}
+
+.row-item-right{
+    margin-left:5%;
+    width: 100%;
+}
+
+#loading {
+    position: absolute;
+    z-index: 4;
+    top: 28%;
+    left: 38%;
+    width: 20vw;
+    border-radius: 5px;
+    display: none;
+}
+
+@media only screen and (max-width: 480px) {
+    #encryption-row {
+        display: flex;
+        flex-direction: horizontal;
+        flex-wrap: wrap;
+        padding-top: 2.5%;
+        padding-bottom: 2.5%;
+    }
+    
+    #decryption-row {
+        display: flex;
+        flex-direction: horizontal;
+        flex-wrap: wrap;
+        padding-top: 2.5%;
+        padding-bottom: 2.5%;
+    }
+    .row-item-left {
+        margin-right:0;
+        width: 100%;
+    }
+    .row-item-right {
+        margin-top:3vw;
+        margin-left:0;
+        width: 100%;
+    }
+    textarea {
+        width: 80vw;
+    }
+    #loading {
+        position: absolute;
+        z-index: 4;
+        top: 50%;
+        left: 30%;
+        width: 40vw;
+        border-radius: 5px;
+        display: none;
+    }
+
+    #footer {
+        display: none;
+    }
+}

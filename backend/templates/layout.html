@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Stylesheets -->
+    <!-- Semantic UI stuff -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <!-- Enable responsiveness on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+    <title>{% block title %}{% endblock %} &middot; Cryptogram Solver</title>
+    {% block head %}
+    {% endblock %}
+    <div class="ui secondary pointing menu">
+      <a class="item" href="/">
+        Solver
+      </a>
+      <a class="item" href="/assignment">
+        Assignment
+      </a>
+      <a class="item" href="/report">
+        Report
+      </a>
+      <a class="item" href="/help">
+        Help
+      </a>
+    </div>
+  </head>
+  <body>
+    <div id="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+    <div id="footer">
+      <!-- Please don't remove this -->
+      <p id="credits">Created by <a href="https://github.com/AllenWang314/cryptogram-solver" class="colored">AllenWang314</a></p>
+    </div>
+
+    {% block end %}
+    {% endblock %}
+
+  </body>
+
+</html>

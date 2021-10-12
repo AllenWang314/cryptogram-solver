@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Assignment{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h1>Assignment</h1>
+<div id="assignment-pdf"></div>
+{% endblock %}
+{% block end %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/pdfobject.js') }}"></script>
+<script type="text/javascript">PDFObject.embed("{{ url_for('static', filename='pdfs/project.pdf') }}", "#assignment-pdf");</script>
+{% endblock %}

@@ -1,5 +1,5 @@
 # cryptogram-solver
-A MCMC-based algorithm that solves substitution cryptograms
+A MCMC-based algorithm that solves substitution cryptograms. A demo of part 1 of the project is deployed [here](https://cryptogram.allenwang314.com).
 
 ## Background
 The project was the final assignment in MIT's 6.437 Inference and Information. In the first part of the project, students created an MCMC algorithm that decrypted a substitution cryptogram where 28 characters (the alphabet, space char, and period) were used in the key. In the second part, the goal was to improve the overall accuracy of the first part, but also allow the algorithm to decrypt messages with a *breakpoint*, a point in the text where the key was changed.

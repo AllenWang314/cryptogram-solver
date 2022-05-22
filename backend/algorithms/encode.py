@@ -1,24 +1,3 @@
-"""
-Script for generating ciphertexts.
-Usage: python3 encode.py plaintext.out ciphertext.out has_breakpoint [seed]
-
-Behavior:
-    1. Reads in standard input (until EOF).
-    2. Cleans text to satisfy requirements given in the project handout.
-    3. Writes the cleaned text to `plaintext.out`.
-    4. Encodes the cleaned text and writes the ciphertext to `ciphertext.out`.
-
-Setting has_breakpoint to true encodes with a breakpoint.
-Passing a seed as the optional last argument makes the encoding deterministic.
-
-Example invocations:
-    python3 encode.py plaintext.txt ciphertext.txt false 42 < data/texts/feynman.txt
-    python3 encode.py plaintext.txt ciphertext.txt true < data/texts/tolstoy.txt
-
-Can also be used for cleaning text in the following way:
-    python3 encode.py clean.txt /dev/null 0 < dirty.txt
-"""
-
 import sys
 import string
 import random
@@ -71,32 +50,3 @@ def encode_with_breakpoint(plaintext):
     print(f"Breakpoint at position {bpoint}")
 
     return encode(plaintext[:bpoint]) + encode(plaintext[bpoint:])
-
-
-def main():
-    plaintext_out = sys.argv[1]
-    ciphertext_out = sys.argv[2]
-    has_breakpoint = (sys.argv[3].lower() == "true")
-    if len(sys.argv) > 4:
-        random.seed(sys.argv[4])
-
-    raw_text = sys.stdin.read()
-
-    plaintext = clean_text(raw_text)
-    print(f"Clean plaintext length: {len(plaintext)}")
-    with open(plaintext_out, "w") as f:
-        f.write(plaintext)
-
-    if has_breakpoint:
-        print("Encoding with breakpoint...")
-        ciphertext = encode_with_breakpoint(plaintext)
-    else:
-        print("Encoding without breakpoint")
-        ciphertext = encode(plaintext)
-
-    with open(ciphertext_out, "w") as f:
-        f.write(ciphertext)
-
-
-if __name__ == "__main__":
-    main()

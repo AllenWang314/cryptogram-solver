@@ -4,6 +4,7 @@ import math
 from spellchecker import SpellChecker
 import numpy as np
 from backend.algorithms import datasets
+from flask import url_for
 
 
 '''Output resulting string after a pair of indices a and b are swapped in curr_str'''
@@ -476,7 +477,7 @@ def cleanup(plaintext, datasets):
 
 '''Evaluates accuracy given two piece of plaintext'''
 def accuracy(deciphered_message):
-    fin = open("./plaintext.txt", "r")
+    fin = open(url_for('static', filename='data/test/plaintext.txt'), "r")
     plaintext = fin.read()
     fin.close()
     correct_char = 0
@@ -490,11 +491,9 @@ def decode(ciphertext, has_breakpoint):
     plaintext = ""
     if (has_breakpoint):
         plaintext = decode_part_2(ciphertext, datasets)
-        # print("accuracy is " + str(accuracy(plaintext)))
         plaintext = cleanup(plaintext, datasets)
     else:
         plaintext = decode_part_1(ciphertext, datasets)["plaintext"]
-    # print("final accuracy is " + str(accuracy(plaintext)))
     return plaintext
 
 '''web version of decode'''
@@ -533,20 +532,3 @@ def decode_web_version(ciphertext):
                 best_key = curr_str
                 best_likelihood = curr_likelihood + curr_score
     return decipher(original_ciphertext, best_key, datasets)
-
-
-''' main function of module '''
-def main():
-    # when testing with encode.py use ciphertext.txt and plaintext.txt as inputs
-    # decoded text at end written in decoded_text.txt
-    random.seed(162)
-    fin = open("./ciphertext.txt", "r")
-    ciphertext = fin.read()
-    fin.close()
-    plaintext = decode(ciphertext, False)
-    fout = open("./decoded_text.txt", "w")
-    fout.write(plaintext)
-    fout.close()
-
-if __name__ == "__main__":
-    main()

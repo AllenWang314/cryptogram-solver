@@ -476,7 +476,7 @@ def cleanup(plaintext, datasets):
 
 '''Evaluates accuracy given two piece of plaintext'''
 def accuracy(deciphered_message):
-    fin = open("plaintext.txt", "r")
+    fin = open("./plaintext.txt", "r")
     plaintext = fin.read()
     fin.close()
     correct_char = 0
@@ -540,11 +540,11 @@ def main():
     # when testing with encode.py use ciphertext.txt and plaintext.txt as inputs
     # decoded text at end written in decoded_text.txt
     random.seed(162)
-    fin = open("ciphertext.txt", "r")
+    fin = open("./ciphertext.txt", "r")
     ciphertext = fin.read()
     fin.close()
     plaintext = decode(ciphertext, False)
-    fout = open("decoded_text.txt", "w")
+    fout = open("./decoded_text.txt", "w")
     fout.write(plaintext)
     fout.close()
 
